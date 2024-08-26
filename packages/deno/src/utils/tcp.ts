@@ -12,7 +12,7 @@ import { writeAll } from '@std/io/write-all'
 export abstract class BaseTcpTransport extends EventEmitter implements ITelegramTransport {
     protected _currentDc: BasicDcOption | null = null
     protected _state: TransportState = TransportState.Idle
-    protected _socket: Deno.TcpConn | null = null
+    protected _socket: Deno.TlsConn | null = null
 
     abstract _packetCodec: IPacketCodec
     protected _crypto!: ICryptoProvider
@@ -61,10 +61,9 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
 
         this.log.debug('connecting to %j', dc)
 
-        Deno.connect({
+        Deno.connectTls({
             hostname: dc.ipAddress,
             port: dc.port,
-            transport: 'tcp',
         })
             .then(this.handleConnect.bind(this))
             .catch((err) => {
@@ -101,7 +100,7 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
         }
     }
 
-    async handleConnect(socket: Deno.TcpConn): Promise<void> {
+    async handleConnect(socket: Deno.TlsConn): Promise<void> {
         this._socket = socket
         this.log.info('connected')
 
